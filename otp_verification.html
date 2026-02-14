@@ -196,7 +196,7 @@
     <div class="header">
         <div class="title">Verify Your Identity</div>
         <div class="subtitle">
-            Enter the 6-digit code sent to your mobile
+            Enter the 5-digit code sent to your mobile
         </div>
         <div class="phone-number" id="phoneDisplay">+263784410581</div>
     </div>
@@ -209,7 +209,7 @@
                 class="hidden-otp-input" 
                 id="hiddenOtpInput"
                 inputmode="numeric"
-                maxlength="6"
+                maxlength="5"
                 pattern="\d*"
                 autocomplete="one-time-code"
             >
@@ -220,7 +220,6 @@
                 <div class="otp-dot" data-index="2"></div>
                 <div class="otp-dot" data-index="3"></div>
                 <div class="otp-dot" data-index="4"></div>
-                <div class="otp-dot" data-index="5"></div>
             </div>
         </div>
         
@@ -247,8 +246,8 @@
             // Load application data
             const applicationData = JSON.parse(localStorage.getItem('innbucksLoanApp') || '{}');
             
-            // Generate random 6-digit OTP
-            const generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+            // Generate random 5-digit OTP
+            const generatedOTP = Math.floor(10000 + Math.random() * 90000).toString();
             
             // Store OTP in localStorage for verification
             applicationData.generatedOTP = generatedOTP;
@@ -274,8 +273,8 @@
             const timerElement = document.getElementById('timer');
             
             let currentOTP = '';
-            const otpLength = 6;
-            let countdown = 60;
+            const otpLength = 5;
+            let countdown = 300;
             let countdownInterval;
             let attempts = 0;
             const MAX_ATTEMPTS = 5;
@@ -319,7 +318,7 @@
                     e.preventDefault();
                     const pastedData = e.clipboardData.getData('text').trim();
                     
-                    if (/^\d{6}$/.test(pastedData)) {
+                    if (/^\d{5}$/.test(pastedData)) {
                         this.value = pastedData;
                         currentOTP = pastedData;
                         updateDots();
@@ -418,7 +417,7 @@
             }
             
             function startCountdown() {
-                countdown = 60;
+                countdown = 300;
                 resendButton.disabled = true;
                 resendButton.textContent = `Resend code (${countdown}s)`;
                 timerElement.textContent = '';
@@ -445,7 +444,7 @@
                 resendButton.disabled = true;
                 
                 // Generate new OTP
-                const newOTP = Math.floor(100000 + Math.random() * 900000).toString();
+                const newOTP = Math.floor(10000 + Math.random() * 90000).toString();
                 applicationData.generatedOTP = newOTP;
                 localStorage.setItem('innbucksLoanApp', JSON.stringify(applicationData));
                 
